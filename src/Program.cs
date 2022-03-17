@@ -1,11 +1,24 @@
 ﻿using System.Diagnostics;
 
-var directory = @"\\wse\music\processed\Melvins";
-var files = Directory.GetFiles(directory, "*.mp3", SearchOption.AllDirectories);
-Console.WriteLine($"Enumerated {files.Length} files.  Starting benchmark...");
+var directories = new[] {
+    @"\\path\to\mp3s"
+};
 
-Benchmark("TagLib", () => ProcessWithTagLib(files));
-Benchmark("ATL", () => ProcessWithATL(files));
+var files = new List<string>();
+
+foreach (var dir in directories)
+{
+    files.AddRange(Directory.GetFiles(dir, "*.mp3", SearchOption.AllDirectories));
+}
+
+Console.WriteLine($"Enumerated {files.Count} files.  Starting benchmark...");
+
+for (int i = 0; i < 5; i++)
+{
+    Console.WriteLine($"Run: {i+1}");
+    Benchmark("TagLib", () => ProcessWithTagLib(files));
+    Benchmark("ATL", () => ProcessWithATL(files));
+}
 
 void Benchmark(string name, Action action)
 {
@@ -16,7 +29,7 @@ void Benchmark(string name, Action action)
     Console.WriteLine($"{name} completed in {sw.ElapsedMilliseconds}ms");
 }
 
-void ProcessWithTagLib(string[] files)
+void ProcessWithTagLib(List<string> files)
 {
     foreach (var file in files)
     {
@@ -25,7 +38,7 @@ void ProcessWithTagLib(string[] files)
     }
 }
 
-void ProcessWithATL(string[] files)
+void ProcessWithATL(List<string> files)
 {
     foreach (var file in files)
     {
